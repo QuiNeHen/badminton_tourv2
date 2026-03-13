@@ -13,6 +13,11 @@ export function parseName(raw) {
   return raw.trim()
 }
 
+/**
+ * buildPlayers: expand "Viet Anh 3" into:
+ *   { raw:'Viet Anh 3', name:'Viet Anh', count:3, num:X, slots:['Viet Anh','Viet Anh (2)','Viet Anh (3)'] }
+ * Each slot is a distinct draggable player card name.
+ */
 export function buildPlayers(rawList) {
   let num = 1
   return rawList
@@ -20,10 +25,19 @@ export function buildPlayers(rawList) {
     .map(raw => {
       const count = parseCount(raw)
       const name  = parseName(raw)
-      const obj   = { raw: raw.trim(), name, count, num }
+      // Generate slot names: original name + "(2)", "(3)"… for extras
+      const slots = Array.from({ length: count }, (_, i) =>
+        i === 0 ? name : `${name} (${i + 1})`
+      )
+      const obj = { raw: raw.trim(), name, count, num, slots }
       num += count
       return obj
     })
+}
+
+/** Flat list of all slot names for team picker */
+export function allSlots(players) {
+  return players.flatMap(p => p.slots)
 }
 
 /* ── Round helpers ───────────────────────────────────── */
@@ -47,7 +61,6 @@ export function getWarnings(rounds, ri, ci) {
   const cur = rounds[ri].courts[ci]
   const all = [...cur.A, ...cur.B].filter(Boolean)
 
-  // streak on same court
   all.forEach(p => {
     let streak = 0
     for (let r = ri; r >= 0; r--) {
@@ -55,10 +68,9 @@ export function getWarnings(rounds, ri, ci) {
       if (c && [...c.A, ...c.B].includes(p)) streak++
       else break
     }
-    if (streak > 2) w.push(`"${p}" đã ở sân này ${streak} round liên tiếp`)
+    if (streak > 2) w.push(`"${p}" has been on Court ${ci+1} for ${streak} rounds in a row`)
   })
 
-  // same team streak
   ;[cur.A, cur.B].forEach(team => {
     const m = team.filter(Boolean)
     if (m.length < 2) return
@@ -66,7 +78,7 @@ export function getWarnings(rounds, ri, ci) {
       const pc = rounds[r]?.courts[ci]
       if (!pc) continue
       if ([pc.A, pc.B].some(t => m.every(p => t.includes(p))))
-        w.push(`${m.join(' & ')} đã cùng team nhiều round liên tiếp`)
+        w.push(`${m.join(' & ')} have been on the same team multiple rounds`)
     }
   })
 
@@ -98,6 +110,6 @@ export function copyText(text) {
 /* ── Payment date label ──────────────────────────────── */
 export function formatPayDate(isoDate) {
   const d    = new Date(isoDate + 'T00:00:00')
-  const days = ['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7']
-  return `${days[d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  return `${days[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
 }
