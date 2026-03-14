@@ -164,17 +164,18 @@ export default function PaymentPage({ session, payments, setState }) {
       : ''
 
     const exportText = [
-      `@All BADMINTON ${payDate}`,
-      '',
-      `Court + water: ${cFee}k`,
-      `Shuttlecock: ${q} x ${p} = ${shuttle}k`,
-      '',
-      `Total ${total} / ${n} ≈ ${each}k/person`,
-      '',
-      playerLines,
-      '',
-      `TRANSFER TO ${recv} !!!`,
-    ].join('\n')
+  `@All CẦU LÔNG TOUR ${payDate}`,
+  '',
+  `Tiền sân + nước: ${cFee}k`,
+  `Tiền cầu: ${q} x ${p} = ${shuttle}k`,
+  '',
+  `Tổng ${total} / ${n} ≈ ${each}k/người`,
+  '',
+  playerLines,
+  '',
+  `CHUYỂN KHOẢN: ${recv} !!!`,
+  '--------------//-----------------',
+].join('\n')
 
     setResult({ cFee, shuttle, total, each, n, q, p, exportText, recv, payDate })
   }
